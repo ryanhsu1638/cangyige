@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- APP 化專屬 Meta 設定 -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="藏易閣">
+    <meta name="theme-color" content="#05020a">
+    <!-- 動態 Manifest 連結 -->
+    <link id="manifest-link" rel="manifest" href="">
+    <link id="apple-touch-icon" rel="apple-touch-icon" href="">
+    
+    <title>藏易閣</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lunar-javascript/lunar.min.js"></script>
+
+    <style>
+        body {
+            /* 宇宙深藍與黑色的漸層背景 */
+            background: radial-gradient(circle at 50% 30%, #160a2e 0%, #05020a 100%);
+            color: #e2e8f0;
+            position: relative;
+            z-index: 0;
+            min-height: 100vh;
+            overflow-x: hidden;
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* 模擬星空背景點綴 */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background-image: 
+                radial-gradient(rgba(255, 255, 255, 0.15) 1px, transparent 1px),
+                radial-gradient(rgba(255, 255, 255, 0.1) 1px, transparent 1px);
+            background-size: 60px 60px, 100px 100px;
+            background-position: 0 0, 30px 30px;
+            opacity: 0.5;
+            z-index: -1;
+        }
+
+        @keyframes mystic-pulse {
+            0% { box-shadow: 0 0 20px rgba(6, 182, 212, 0.2), inset 0 0 20px rgba(139, 92, 246, 0.2); }
+            50% { box-shadow: 0 0 45px rgba(6, 182, 212, 0.5), inset 0 0 40px rgba(139, 92, 246, 0.4); }
+            100% { box-shadow: 0 0 20px rgba(6, 182, 212, 0.2), inset 0 0 20px rgba(139, 92, 246, 0.2); }
+        }
+
+        @keyframes star-float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-3px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 10px;
+            width: 100%;
+            max-width: 320px;
+            aspect-ratio: 1 / 1;
+            margin: 0 auto;
+            padding: 16px;
+            background-color: rgba(15, 10, 30, 0.6);
+            border-radius: 16px;
+            backdrop-filter: blur(12px);
+            animation: mystic-pulse 6s infinite alternate;
+        }
+
+        .grid-cell {
+            background-color: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            overflow: hidden;
+        }
+
+        .grid-cell:hover {
+            transform: scale(1.08);
+            background-color: rgba(20, 15, 45, 0.8);
+            border-color: rgba(6, 182, 212, 0.6);
+            box-shadow: 0 0 20px rgba(6, 182, 212, 0.5), inset 0 0 10px rgba(139, 92, 246, 0.4);
+            z-index: 10;
+        }
+
+        /* 運星 (大數字) */
+        .star-base {
+            font-size: 3.2rem;
+            font-weight: bold;
+            z-index: 2;
+            line-height: 1;
+            animation: star-float 4s infinite ease-in-out;
+        }
+
+        /* 宮位名稱 */
+        .palace-name {
+            position: absolute;
+            bottom: 6px;
+            right: 8px;
+            font-size: 0.75rem;
+            color: rgba(148, 163, 184, 0.6);
+            letter-spacing: 0.1em;
+        }
+
+        .color-1 { color: #ffffff; text-shadow: 0 0 10px #fff, 0 0 20px #0ff; } /* 一白水 */
+        .color-2 { color: #a1a1aa; text-shadow: 0 0 8px #a1a1aa; } /* 二黑土 */
+        .color-3 { color: #2dd4bf; text-shadow: 0 0 12px #2dd4bf; } /* 三碧木 */
+        .color-4 { color: #4ade80; text-shadow: 0 0 12px #4ade80; } /* 四綠木 */
+        .color-5 { color: #facc15; text-shadow: 0 0 15px #facc15; } /* 五黃土 */
+        .color-6 { color: #f8fafc; text-shadow: 0 0 10px #f8fafc; } /* 六白金 */
+        .color-7 { color: #f87171; text-shadow: 0 0 15px #ef4444; } /* 七赤金 */
+        .color-8 { color: #e2e8f0; text-shadow: 0 0 10px #cbd5e1; } /* 八白土 */
+        .color-9 { color: #d946ef; text-shadow: 0 0 15px #c026d3; } /* 九紫火 */
+
+        /* 小六壬網格樣式微調 */
+        .liuren-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(2, 1fr);
+            gap: 12px;
+            width: 100%;
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        .liuren-cell {
+            background-color: rgba(15, 10, 30, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px 10px;
+            text-align: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(8px);
+        }
+
+        .liuren-cell.active {
+            transform: scale(1.05);
+            background-color: rgba(30, 20, 60, 0.9);
+            border-color: currentColor;
+            box-shadow: 0 0 20px currentColor;
+            z-index: 10;
+        }
+
+        .liuren-cell.active::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, transparent 100%);
+            pointer-events: none;
+        }
+
+        /* 隱藏滾動條 */
+        ::-webkit-scrollbar { width: 0px; background: transparent; }
+    </style>
+</head>
+<body class="flex flex-col text-gray-200">
+
+    <header class="bg-indigo-950/40 backdrop-blur-md border-b border-purple-500/20 p-4 sticky top-0 z-40">
+        <div class="container mx-auto flex flex-col md:flex-row justify-between items-center gap-4 px-2">
+            <h1 class="text-xl md:text-2xl font-bold tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-purple-400 drop-shadow-[0_0_8px_rgba(139,92,246,0.6)]">
+                藏易閣
+            </h1>
+            
+            <!-- 頁籤切換器 -->
+            <div class="flex bg-gray-900/60 p-1 rounded-full border border-gray-700/50 backdrop-blur-sm">
+                <button id="tab-stars" class="px-6 py-2 rounded-full text-sm font-bold transition-all duration-300 bg-cyan-900/60 text-cyan-200 shadow-[0_0_10px_rgba(6,182,212,0.4)]">
+                    九宮飛星
+                </button>
+                <button id="tab-liuren" class="px-6 py-2 rounded-full text-sm font-bold transition-all duration-300 text-gray-400 hover:text-gray-200">
+                    小六壬占卜
+                </button>
+            </div>
+
+            <button id="open-settings-btn" class="flex items-center gap-2 text-sm text-cyan-200 hover:text-cyan-400 hover:drop-shadow-[0_0_8px_rgba(34,211,238,0.8)] transition border border-cyan-500/30 px-4 py-2 rounded-full bg-cyan-950/30">
+                <span>時空設定</span>
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <div class="w-full flex justify-center py-6 px-4 z-10">
+        <div class="flex flex-col md:flex-row items-center gap-4 bg-gray-900/40 border border-purple-500/30 backdrop-blur-md px-8 py-4 rounded-2xl shadow-[0_0_20px_rgba(0,0,0,0.6)]">
+            <span class="text-gray-400 text-sm tracking-widest uppercase">四柱八字</span>
+            <div class="flex gap-4 md:gap-6 text-xl md:text-2xl font-bold tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-yellow-100 to-yellow-300 drop-shadow-[0_0_10px_rgba(250,204,21,0.5)]" id="bazi-display">
+                <!-- JS 動態填入 -->
+                <span id="bz-year">--年</span>
+                <span id="bz-month">--月</span>
+                <span id="bz-day">--日</span>
+                <span id="bz-time">--時</span>
+            </div>
+        </div>
+    </div>
+
+    <main class="flex-grow container mx-auto px-4 pb-12 relative z-10 w-full max-w-5xl">
+        
+        <!-- 九宮飛星頁面 (預設顯示) -->
+        <div id="view-stars" class="w-full grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-12 place-items-center transition-opacity duration-500">
+            
+            <!-- 區塊 1: 元運盤 -->
+            <div class="flex flex-col items-center w-full">
+                <h3 id="title-period" class="text-lg font-bold mb-4 text-purple-300 tracking-widest drop-shadow-[0_0_8px_rgba(139,92,246,0.8)]">【九運盤】</h3>
+                <div class="grid-container !border-purple-500/40" id="period-grid"></div>
+            </div>
+
+            <!-- 區塊 2: 流年盤 -->
+            <div class="flex flex-col items-center w-full">
+                <h3 id="title-year" class="text-lg font-bold mb-4 text-cyan-300 tracking-widest drop-shadow-[0_0_8px_rgba(6,182,212,0.8)]">【流年盤】</h3>
+                <div class="grid-container !border-cyan-500/40" id="year-grid"></div>
+            </div>
+
+            <!-- 區塊 3: 流月盤 -->
+            <div class="flex flex-col items-center w-full">
+                <h3 id="title-month" class="text-lg font-bold mb-4 text-teal-300 tracking-widest drop-shadow-[0_0_8px_rgba(45,212,191,0.8)]">【流月盤】</h3>
+                <div class="grid-container !border-teal-500/40" id="month-grid"></div>
+            </div>
+
+            <!-- 區塊 4: 流日盤 -->
+            <div class="flex flex-col items-center w-full">
+                <h3 id="title-day" class="text-lg font-bold mb-4 text-yellow-300 tracking-widest drop-shadow-[0_0_8px_rgba(250,204,21,0.8)]">【流日盤】</h3>
+                <div class="grid-container !border-yellow-500/40" id="day-grid"></div>
+            </div>
+
+        </div>
+
+        <!-- 小六壬頁面 -->
+        <div id="view-liuren" class="w-full flex flex-col items-center transition-opacity duration-500 hidden opacity-0">
+            
+            <div class="mb-6 text-center">
+                <p class="text-gray-300 text-sm md:text-base tracking-wider mb-2">諸葛馬前課・掐指一算</p>
+                <p id="liuren-formula" class="text-purple-300 text-xs md:text-sm font-mono bg-purple-900/30 px-4 py-2 rounded-lg border border-purple-500/30">
+                    起算路徑：載入中...
+                </p>
+            </div>
+
+            <!-- 小六壬 3x2 網格 (模擬手指位置) -->
+            <div class="liuren-grid mb-8" id="liuren-grid">
+                <!-- JS 動態生成 6 個宮位 -->
+            </div>
+
+            <!-- 占卜結果解析卡片 -->
+            <div id="liuren-result-card" class="w-full max-w-lg bg-gray-900/60 border border-gray-700 rounded-2xl p-6 md:p-8 backdrop-blur-md shadow-2xl relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-current to-transparent opacity-50" id="liuren-card-line"></div>
+                <div class="flex items-end gap-4 mb-4 border-b border-gray-700 pb-4">
+                    <h2 id="liuren-result-title" class="text-4xl font-bold tracking-widest">--</h2>
+                    <span id="liuren-result-type" class="text-xl font-bold px-3 py-1 rounded-md bg-gray-800 border">--</span>
+                </div>
+                <p id="liuren-result-desc" class="text-lg leading-relaxed text-gray-200 tracking-wide mb-4 whitespace-pre-line">
+                    請設定時間以進行占卜。
+                </p>
+                <p id="liuren-result-poem" class="text-sm text-gray-400 italic border-l-2 pl-3 border-gray-600">
+                    --
+                </p>
+            </div>
+            
+            <div class="mt-8">
+                <button id="btn-divine-now" class="flex items-center gap-2 bg-gradient-to-r from-purple-700 to-indigo-700 hover:from-purple-600 hover:to-indigo-600 text-white font-bold py-3 px-8 rounded-full shadow-[0_0_15px_rgba(139,92,246,0.5)] transition hover:scale-105 active:scale-95">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd" />
+                    </svg>
+                    以此刻心念起卦 (取現在時間)
+                </button>
+            </div>
+        </div>
+
+    </main>
+
+    <div id="settings-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md hidden items-center justify-center z-50 transition-opacity opacity-0">
+        <div class="bg-gray-900/90 border border-cyan-500/30 p-8 rounded-2xl w-full max-w-sm shadow-[0_0_30px_rgba(6,182,212,0.3)] transform transition-transform scale-95" id="settings-content">
+            <h2 class="text-xl font-bold mb-6 border-b border-cyan-500/30 pb-3 text-cyan-300 tracking-wider flex justify-between items-center">
+                時空設定
+                <button id="close-icon-btn" class="text-gray-400 hover:text-white">&times;</button>
+            </h2>
+            
+            <div class="space-y-5">
+                <div>
+                    <label class="block text-cyan-200 text-sm font-bold mb-1 tracking-wider">自訂日期時間</label>
+                    <input type="datetime-local" id="custom-datetime" class="w-full bg-gray-800/80 border border-gray-600 rounded-lg px-3 py-2 text-gray-200 focus:outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-400 transition">
+                </div>
+
+                <div class="pt-4 flex gap-4">
+                    <button id="reset-now-btn" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-bold py-3 px-4 rounded-lg transition border border-gray-500">
+                        回到現在
+                    </button>
+                    <button id="apply-settings-btn" class="flex-1 bg-gradient-to-r from-purple-700 to-cyan-700 hover:from-purple-600 hover:to-cyan-600 text-white font-bold py-3 px-4 rounded-lg shadow-[0_0_15px_rgba(6,182,212,0.4)] transition">
+                        套用排盤
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const appIconBase64 = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cmVjdCB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgZmlsbD0iIzA1MDIwYSIvPjxjaXJjbGUgY3g9IjI1NiIgY3k9IjI1NiIgcj0iMjMyIiBzdHJva2U9IiM4YjVjZjYiIHN0cm9rZS13aWR0aD0iMTYiIGZpbGw9Im5vbmUiLz48Y2lyY2xlIGN4PSIyNTYiIGN5PSIyNTYiIHI9IjIwMCIgc3Ryb2tlPSIjMjJkM2VlIiBzdHJva2Utd2lkdGg9IjQiIGZpbGw9Im5vbmUiIHN0cm9rZS1kYXNoYXJyYXk9IjIwIDEwIi8+PHRleHQgeD0iMjU2IiB5PSIzMDUiIGZvbnQtc2l6ZT0iMTgwIiBmaWxsPSIjMjJkM2VlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0iJ05vdG8gU2VyaWYgVEMnLCBzZXJpZiIgZm9udC13ZWlnaHQ9ImJvbGQiIHRleHQtc2hhZG93PSIwIDAgMjBweCAjMjJkM2VlIj7mmJM8L3RleHQ+PC9zdmc+";
+        
+        // PWA 註冊與設定
+        const manifestData = {
+            "name": "藏易閣",
+            "short_name": "藏易閣",
+            "description": "三元玄空飛星與小六壬占卜",
+            "start_url": ".",
+            "display": "standalone",
+            "background_color": "#05020a",
+            "theme_color": "#160a2e",
+            "icons": [
+                {
+                    "src": appIconBase64,
+                    "sizes": "512x512",
+                    "type": "image/svg+xml"
+                }
+            ]
+        };
+        
+        const manifestBlob = new Blob([JSON.stringify(manifestData)], { type: 'application/json' });
+        const manifestUrl = URL.createObjectURL(manifestBlob);
+        document.getElementById('manifest-link').setAttribute('href', manifestUrl);
+        document.getElementById('apple-touch-icon').setAttribute('href', appIconBase64);
+
+        // 洛書九宮順序及宮名 (排版對應: 巽, 離, 坤, 震, 中, 兌, 艮, 坎, 乾)
+        const luoshuIndices = [
+            { id: 'se', name: '巽' }, { id: 's', name: '離' }, { id: 'sw', name: '坤' },
+            { id: 'e', name: '震' }, { id: 'c', name: '中' }, { id: 'w', name: '兌' },
+            { id: 'ne', name: '艮' }, { id: 'n', name: '坎' }, { id: 'nw', name: '乾' }
+        ];
+
+        // 飛星軌跡 (中->乾->兌->艮->離->坎->坤->震->巽)
+        const flyPath = [4, 8, 5, 6, 1, 7, 2, 3, 0]; 
+        
+        function flyStars(centerStar, isForward = true) {
+            let stars = new Array(9);
+            let currentStar = centerStar;
+            for (let i = 0; i < 9; i++) {
+                stars[flyPath[i]] = currentStar;
+                if (isForward) {
+                    currentStar = currentStar === 9 ? 1 : currentStar + 1;
+                } else {
+                    currentStar = currentStar === 1 ? 9 : currentStar - 1;
+                }
+            }
+            return stars;
+        }
+
+        // 流年紫白飛星入中 (公式計算)
+        function getYearStar(year) {
+            let sum = 0;
+            let tempYear = year;
+            while (tempYear > 0) {
+                sum += tempYear % 10;
+                tempYear = Math.floor(tempYear / 10);
+            }
+            while (sum > 9) {
+                let tempSum = 0;
+                while (sum > 0) {
+                    tempSum += sum % 10;
+                    sum = Math.floor(sum / 10);
+                }
+                sum = tempSum;
+            }
+            let star = 11 - sum;
+            if (year >= 2000) star -= 1; // 2000年後修正
+            while (star <= 0) star += 9;
+            while (star > 9) star -= 9;
+            return star;
+        }
+
+        // 取得三元九運 (每20年一運)
+        function getPeriod(year) {
+            if (year >= 1984 && year <= 2003) return 7;
+            if (year >= 2004 && year <= 2023) return 8;
+            if (year >= 2024 && year <= 2043) return 9;
+            return Math.ceil((year - 1863) / 20) % 9 || 9; // 近代推算
+        }
+
+        const liurenData = {
+            1: { name: '大安', type: '大吉', color: '#4ade80', tailwind: 'text-green-400', border: 'rgba(74,222,128,0.6)', desc: '大安事事昌，求財在坤方。\n失物去不遠，宅舍保安康。', poem: '行人身未動，病者主無妨。將軍回田野，仔細更推詳。', gridIndex: 3 },
+            2: { name: '留連', type: '平凶', color: '#94a3b8', tailwind: 'text-slate-400', border: 'rgba(148,163,184,0.6)', desc: '留連事難成，求謀日未明。\n官事只宜緩，去者未回程。', poem: '失物南方見，急討方稱心。更須防口舌，人口且平平。', gridIndex: 0 },
+            3: { name: '速喜', type: '中吉', color: '#f87171', tailwind: 'text-red-400', border: 'rgba(248,113,113,0.6)', desc: '速喜喜來臨，求財向南行。\n失物申未午，逢人路上尋。', poem: '官事有福德，病者無禍侵。田宅六畜吉，行人有信音。', gridIndex: 1 },
+            4: { name: '赤口', type: '大凶', color: '#fb923c', tailwind: 'text-orange-400', border: 'rgba(251,146,60,0.6)', desc: '赤口主口舌，官非切忌防。\n失物急去尋，行人有驚慌。', poem: '雞犬多作怪，病者出西方。更須防咒詛，誠恐染瘟殃。', gridIndex: 2 },
+            5: { name: '小吉', type: '小吉', color: '#facc15', tailwind: 'text-yellow-400', border: 'rgba(250,204,21,0.6)', desc: '小吉最吉昌，路上好商量。\n陰人來報喜，失物在坤方。', poem: '行人即便至，交關甚是強。凡事皆和合，病者叩穹蒼。', gridIndex: 5 },
+            6: { name: '空亡', type: '大凶', color: '#c084fc', tailwind: 'text-purple-400', border: 'rgba(192,132,252,0.6)', desc: '空亡事不長，陰人小乖張。\n求財無利益，行人有災殃。', poem: '失物尋一見，官事有刑傷。病人逢暗鬼，解禳保安康。', gridIndex: 4 }
+        };
+
+        // 繪製小六壬初始網格
+        function initLiurenGrid() {
+            const grid = document.getElementById('liuren-grid');
+            let htmlArray = new Array(6);
+            
+            Object.keys(liurenData).forEach(key => {
+                const data = liurenData[key];
+                htmlArray[data.gridIndex] = `
+                    <div class="liuren-cell text-gray-500" id="liuren-cell-${key}" style="color: ${data.color}">
+                        <div class="text-2xl font-bold tracking-widest">${data.name}</div>
+                        <div class="text-xs mt-1 opacity-70">${data.type}</div>
+                    </div>
+                `;
+            });
+            grid.innerHTML = htmlArray.join('');
+        }
+
+        // 執行小六壬計算與渲染
+        function renderLiuren(lunarMonth, lunarDay, timeZhiStr) {
+            const zhiList = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+            const timeIndex = zhiList.indexOf(timeZhiStr) + 1; // 1-12
+            
+            // 算法：(月 + 日 + 時 - 2) % 6，若為0則是6 (空亡)
+            let resultNumber = (lunarMonth + lunarDay + timeIndex - 2) % 6;
+            if (resultNumber === 0) resultNumber = 6;
+
+            // 更新公式顯示
+            document.getElementById('liuren-formula').innerText = 
+                `農曆 ${lunarMonth}月 (起大安) ➔ ${lunarDay}日 ➔ ${timeZhiStr}時 (${timeIndex})`;
+
+            // 重置所有宮位狀態
+            for (let i = 1; i <= 6; i++) {
+                const cell = document.getElementById(`liuren-cell-${i}`);
+                if (cell) {
+                    cell.classList.remove('active');
+                    cell.style.borderColor = 'rgba(255, 255, 255, 0.1)';
+                }
+            }
+
+            // 啟動結果宮位
+            const activeData = liurenData[resultNumber];
+            const activeCell = document.getElementById(`liuren-cell-${resultNumber}`);
+            if (activeCell) {
+                activeCell.classList.add('active');
+                activeCell.style.color = activeData.color;
+                activeCell.style.borderColor = activeData.color;
+            }
+
+            // 更新結果卡片
+            const titleEl = document.getElementById('liuren-result-title');
+            const typeEl = document.getElementById('liuren-result-type');
+            
+            titleEl.innerText = activeData.name;
+            titleEl.className = `text-4xl font-bold tracking-widest ${activeData.tailwind}`;
+            
+            typeEl.innerText = activeData.type;
+            typeEl.className = `text-lg font-bold px-3 py-1 rounded-md bg-gray-800 border border-gray-600 ${activeData.tailwind}`;
+            
+            document.getElementById('liuren-result-desc').innerText = activeData.desc;
+            document.getElementById('liuren-result-poem').innerText = activeData.poem;
+            
+            const cardLine = document.getElementById('liuren-card-line');
+            cardLine.style.color = activeData.color;
+        }
+
+        // 生成單一九宮格 HTML
+        function generateGridHTML(stars) {
+            let html = '';
+            luoshuIndices.forEach((palace, index) => {
+                const s = stars[index];
+                html += `
+                    <div class="grid-cell">
+                        <div class="star-base color-${s}">${s}</div>
+                        <div class="palace-name">${palace.name}</div>
+                    </div>
+                `;
+            });
+            return html;
+        }
+
+        let currentTargetDate = new Date();
+
+        function renderAllGrids() {
+            // 若無法載入 Lunar 庫的備用防護
+            if (typeof Solar === 'undefined' || typeof Lunar === 'undefined') {
+                document.getElementById('bazi-display').innerHTML = '<span class="text-red-400">需連接網路載入曆法庫</span>';
+                return;
+            }
+
+            try {
+                // 1. 取得農曆與天干地支資料
+                const solar = Solar.fromDate(currentTargetDate);
+                const lunar = solar.getLunar();
+                
+                // 四柱八字
+                const yearGz = lunar.getYearInGanZhiExact();
+                const monthGz = lunar.getMonthInGanZhiExact();
+                const dayGz = lunar.getDayInGanZhiExact();
+                const timeGz = lunar.getTimeInGanZhi();
+
+                document.getElementById('bz-year').innerText = yearGz + '年';
+                document.getElementById('bz-month').innerText = monthGz + '月';
+                document.getElementById('bz-day').innerText = dayGz + '日';
+                document.getElementById('bz-time').innerText = timeGz + '時';
+
+                const solarYear = currentTargetDate.getFullYear();
+                const solarMonth = currentTargetDate.getMonth() + 1;
+                const solarDay = currentTargetDate.getDate();
+
+                // 2. 元運盤
+                const period = getPeriod(solarYear);
+                const periodStars = flyStars(period, true);
+                document.getElementById('period-grid').innerHTML = generateGridHTML(periodStars);
+                document.getElementById('title-period').innerText = `【${period}運盤】`;
+
+                // 3. 流年盤
+                const yearCenter = getYearStar(solarYear);
+                const yearStars = flyStars(yearCenter, true);
+                document.getElementById('year-grid').innerHTML = generateGridHTML(yearStars);
+                document.getElementById('title-year').innerText = `【流年盤】`;
+
+                // 4. 流月盤
+                const monthZhi = lunar.getMonthZhiExact(); 
+                const yearZhi = lunar.getYearZhiExact(); 
+                const zhiList = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+                const yearZhiIndex = zhiList.indexOf(yearZhi);
+                
+                const lunarMonthInt = Math.abs(lunar.getMonth());
+                const lunarDayInt = lunar.getDay();
+                const lunarTimeZhi = lunar.getTimeZhi();
+
+                let startStar = 8;
+                if ([0, 6, 3, 9].includes(yearZhiIndex)) startStar = 8;
+                else if ([4, 10, 1, 7].includes(yearZhiIndex)) startStar = 5;
+                else startStar = 2;
+                
+                let monthCenter = startStar - ((solarMonth - 1) % 9);
+                while (monthCenter <= 0) monthCenter += 9;
+                const monthStars = flyStars(monthCenter, true);
+                document.getElementById('month-grid').innerHTML = generateGridHTML(monthStars);
+
+                // 5. 流日盤
+                let pseudoDaySeed = solarYear + solarMonth * 10 + solarDay;
+                let dayCenter = (pseudoDaySeed % 9) + 1;
+                const dayStars = flyStars(dayCenter, true);
+                document.getElementById('day-grid').innerHTML = generateGridHTML(dayStars);
+
+                // 6. 渲染小六壬
+                renderLiuren(lunarMonthInt, lunarDayInt, lunarTimeZhi);
+            } catch (e) {
+                console.error("排盤計算錯誤:", e);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initLiurenGrid();
+
+            const modal = document.getElementById('settings-modal');
+            const content = document.getElementById('settings-content');
+            const openBtn = document.getElementById('open-settings-btn');
+            const closeBtn = document.getElementById('close-icon-btn');
+            const applyBtn = document.getElementById('apply-settings-btn');
+            const resetBtn = document.getElementById('reset-now-btn');
+            const datetimeInput = document.getElementById('custom-datetime');
+            
+            const tabStars = document.getElementById('tab-stars');
+            const tabLiuren = document.getElementById('tab-liuren');
+            const viewStars = document.getElementById('view-stars');
+            const viewLiuren = document.getElementById('view-liuren');
+            const btnDivineNow = document.getElementById('btn-divine-now');
+
+            function switchTab(tab) {
+                if (tab === 'stars') {
+                    tabStars.className = "px-6 py-2 rounded-full text-sm font-bold transition-all duration-300 bg-cyan-900/60 text-cyan-200 shadow-[0_0_10px_rgba(6,182,212,0.4)]";
+                    tabLiuren.className = "px-6 py-2 rounded-full text-sm font-bold transition-all duration-300 text-gray-400 hover:text-gray-200";
+                    viewLiuren.classList.add('opacity-0');
+                    setTimeout(() => {
+                        viewLiuren.classList.add('hidden');
+                        viewStars.classList.remove('hidden');
+                        setTimeout(() => viewStars.classList.remove('opacity-0'), 50);
+                    }, 300);
+                } else {
+                    tabLiuren.className = "px-6 py-2 rounded-full text-sm font-bold transition-all duration-300 bg-purple-900/60 text-purple-200 shadow-[0_0_10px_rgba(168,85,247,0.4)]";
+                    tabStars.className = "px-6 py-2 rounded-full text-sm font-bold transition-all duration-300 text-gray-400 hover:text-gray-200";
+                    viewStars.classList.add('opacity-0');
+                    setTimeout(() => {
+                        viewStars.classList.add('hidden');
+                        viewLiuren.classList.remove('hidden');
+                        setTimeout(() => viewLiuren.classList.remove('opacity-0'), 50);
+                    }, 300);
+                }
+            }
+
+            tabStars.addEventListener('click', () => switchTab('stars'));
+            tabLiuren.addEventListener('click', () => switchTab('liuren'));
+
+            btnDivineNow.addEventListener('click', () => {
+                currentTargetDate = new Date();
+                datetimeInput.value = formatForInput(currentTargetDate);
+                renderAllGrids();
+            });
+
+            function formatForInput(date) {
+                const tzoffset = (new Date()).getTimezoneOffset() * 60000;
+                return (new Date(date - tzoffset)).toISOString().slice(0, 16);
+            }
+            datetimeInput.value = formatForInput(currentTargetDate);
+
+            function toggleModal(show) {
+                if (show) {
+                    modal.classList.remove('hidden');
+                    modal.classList.add('flex');
+                    setTimeout(() => {
+                        modal.classList.remove('opacity-0');
+                        content.classList.remove('scale-95');
+                    }, 10);
+                } else {
+                    modal.classList.add('opacity-0');
+                    content.classList.add('scale-95');
+                    setTimeout(() => {
+                        modal.classList.add('hidden');
+                        modal.classList.remove('flex');
+                    }, 300);
+                }
+            }
+
+            openBtn.addEventListener('click', () => toggleModal(true));
+            closeBtn.addEventListener('click', () => toggleModal(false));
+            
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) toggleModal(false);
+            });
+
+            applyBtn.addEventListener('click', () => {
+                if(datetimeInput.value) {
+                    currentTargetDate = new Date(datetimeInput.value);
+                    renderAllGrids();
+                }
+                toggleModal(false);
+            });
+
+            resetBtn.addEventListener('click', () => {
+                currentTargetDate = new Date();
+                datetimeInput.value = formatForInput(currentTargetDate);
+                renderAllGrids();
+                toggleModal(false);
+            });
+
+            // 確保 Lunar JS 載入後才渲染，多加一層重試機制
+            let retryCount = 0;
+            function checkAndRender() {
+                if (typeof Lunar !== 'undefined') {
+                    renderAllGrids();
+                } else if (retryCount < 10) {
+                    retryCount++;
+                    setTimeout(checkAndRender, 200);
+                } else {
+                    document.getElementById('bazi-display').innerHTML = '<span class="text-red-400">無法連接曆法庫，請檢查網路</span>';
+                }
+            }
+            setTimeout(checkAndRender, 200);
+        });
+    </script>
+</body>
+</html>
