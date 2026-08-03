@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- PWA Meta Tags -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="藏易閣">
@@ -10,12 +11,11 @@
     
     <title>藏易閣</title>
 
+    <!-- Tailwind CSS & Lunar JS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/lunar-javascript/lunar.min.js"></script>
 
-    <!-- INLINE_PWA_START -->
-    <!-- 這段區塊僅供當下預覽使用，打包成 ZIP 時會被腳本自動替換成真實的檔案連結 -->
-    <link rel="apple-touch-icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cmVjdCB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgZmlsbD0iIzA1MDIwYSIvPjxjaXJjbGUgY3g9IjI1NiIgY3k9IjI1NiIgcj0iMjMyIiBzdHJva2U9IiM4YjVjZjYiIHN0cm9rZS13aWR0aD0iMTYiIGZpbGw9Im5vbmUiLz48Y2lyY2xlIGN4PSIyNTYiIGN5PSIyNTYiIHI9IjIwMCIgc3Ryb2tlPSIjMjJkM2VlIiBzdHJva2Utd2lkdGg9IjQiIGZpbGw9Im5vbmUiIHN0cm9rZS1kYXNoYXJyYXk9IjIwIDEwIi8+PHRleHQgeD0iMjU2IiB5PSIzMDUiIGZvbnQtc2l6ZT0iMTgwIiBmaWxsPSIjMjJkM2VlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0iJ05vdG8gU2VyaWYgVEMnLCBzZXJpZiIgZm9udC13ZWlnaHQ9ImJvbGQiIHRleHQtc2hhZG93PSIwIDAgMjBweCAjMjJkM2VlIj7mmJM8L3RleHQ+PC9zdmc+">
+    <!-- 動態生成 PWA 設定，使其可安裝 -->
     <link id="manifest-link" rel="manifest" href="">
     <script>
         const appIconBase64 = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cmVjdCB3aWR0aD0iNTEyIiBoZWlnaHQ9IjUxMiIgZmlsbD0iIzA1MDIwYSIvPjxjaXJjbGUgY3g9IjI1NiIgY3k9IjI1NiIgcj0iMjMyIiBzdHJva2U9IiM4YjVjZjYiIHN0cm9rZS13aWR0aD0iMTYiIGZpbGw9Im5vbmUiLz48Y2lyY2xlIGN4PSIyNTYiIGN5PSIyNTYiIHI9IjIwMCIgc3Ryb2tlPSIjMjJkM2VlIiBzdHJva2Utd2lkdGg9IjQiIGZpbGw9Im5vbmUiIHN0cm9rZS1kYXNoYXJyYXk9IjIwIDEwIi8+PHRleHQgeD0iMjU2IiB5PSIzMDUiIGZvbnQtc2l6ZT0iMTgwIiBmaWxsPSIjMjJkM2VlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmb250LWZhbWlseT0iJ05vdG8gU2VyaWYgVEMnLCBzZXJpZiIgZm9udC13ZWlnaHQ9ImJvbGQiIHRleHQtc2hhZG93PSIwIDAgMjBweCAjMjJkM2VlIj7mmJM8L3RleHQ+PC9zdmc+";
@@ -27,13 +27,18 @@
         document.addEventListener('DOMContentLoaded', () => {
             const manifestUrl = URL.createObjectURL(new Blob([JSON.stringify(manifestData)], { type: 'application/json' }));
             document.getElementById('manifest-link').setAttribute('href', manifestUrl);
+            // 註冊虛擬 Service Worker 以滿足 PWA 安裝條件
             if ('serviceWorker' in navigator) {
                 const swUrl = URL.createObjectURL(new Blob([`self.addEventListener('install', e => self.skipWaiting()); self.addEventListener('fetch', e => {});`], { type: 'application/javascript' }));
                 navigator.serviceWorker.register(swUrl).catch(()=>{});
             }
+            // 寫死蘋果圖標，避免截圖
+            const appleIcon = document.createElement('link');
+            appleIcon.rel = 'apple-touch-icon';
+            appleIcon.href = appIconBase64;
+            document.head.appendChild(appleIcon);
         });
     </script>
-    <!-- INLINE_PWA_END -->
 
     <style>
         body {
@@ -125,6 +130,7 @@
             letter-spacing: 0.1em;
         }
 
+        /* 飛星專屬霓虹發光色 */
         .color-1 { color: #ffffff; text-shadow: 0 0 10px #fff, 0 0 20px #0ff; }
         .color-2 { color: #a1a1aa; text-shadow: 0 0 8px #a1a1aa; }
         .color-3 { color: #2dd4bf; text-shadow: 0 0 12px #2dd4bf; }
@@ -195,12 +201,13 @@
         </div>
     </header>
 
+    <!-- 四柱八字顯示區塊 (直向排版) -->
     <div class="w-full flex justify-center py-6 px-4 z-10">
         <div class="flex flex-col md:flex-row items-center gap-4 bg-gray-900/60 border border-cyan-500/30 backdrop-blur-md px-8 py-4 rounded-2xl shadow-[0_0_20px_rgba(0,0,0,0.8)] w-full max-w-sm md:max-w-none">
             <span class="text-cyan-400/80 text-sm md:text-base tracking-widest uppercase border-b md:border-b-0 md:border-r border-cyan-500/30 pb-3 md:pb-0 md:pr-5 w-full md:w-auto text-center font-bold">
                 四柱八字
             </span>
-            <div class="flex flex-row justify-around md:justify-center w-full md:w-auto gap-4 md:gap-12 text-2xl md:text-3xl font-bold tracking-widest text-cyan-300 drop-shadow-[0_0_8px_rgba(34,211,238,0.7)] text-center pt-2 md:pt-0" id="bazi-display">
+            <div class="flex flex-row justify-around md:justify-center w-full md:w-auto gap-6 md:gap-12 text-2xl md:text-3xl font-bold tracking-widest text-cyan-300 drop-shadow-[0_0_8px_rgba(34,211,238,0.7)] text-center pt-2 md:pt-0" id="bazi-display">
                 <div class="flex flex-col items-center gap-1">
                     <span id="bz-year-gan">-</span>
                     <span id="bz-year-zhi">-</span>
@@ -222,6 +229,7 @@
     </div>
 
     <main class="flex-grow container mx-auto px-4 pb-12 relative z-10 w-full max-w-5xl">
+        <!-- 九宮飛星視圖 -->
         <div id="view-stars" class="w-full grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-12 place-items-center transition-opacity duration-500">
             <div class="flex flex-col items-center w-full">
                 <h3 id="title-period" class="text-lg font-bold mb-4 text-purple-300 tracking-widest drop-shadow-[0_0_8px_rgba(139,92,246,0.8)]">【九運盤】</h3>
@@ -241,12 +249,15 @@
             </div>
         </div>
 
+        <!-- 小六壬占卜視圖 -->
         <div id="view-liuren" class="w-full flex flex-col items-center transition-opacity duration-500 hidden opacity-0">
             <div class="mb-6 text-center">
                 <p class="text-gray-300 text-sm md:text-base tracking-wider mb-2">諸葛馬前課・掐指一算</p>
                 <p id="liuren-formula" class="text-purple-300 text-xs md:text-sm font-mono bg-purple-900/30 px-4 py-2 rounded-lg border border-purple-500/30">起算路徑：載入中...</p>
             </div>
+            <!-- 小六壬 3x2 網格 -->
             <div class="liuren-grid mb-8" id="liuren-grid"></div>
+            <!-- 占卜結果卡片 -->
             <div id="liuren-result-card" class="w-full max-w-lg bg-gray-900/60 border border-gray-700 rounded-2xl p-6 md:p-8 backdrop-blur-md shadow-2xl relative overflow-hidden">
                 <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-current to-transparent opacity-50" id="liuren-card-line"></div>
                 <div class="flex items-end gap-4 mb-4 border-b border-gray-700 pb-4">
@@ -256,6 +267,7 @@
                 <p id="liuren-result-desc" class="text-lg leading-relaxed text-gray-200 tracking-wide mb-4 whitespace-pre-line">請設定時間以進行占卜。</p>
                 <p id="liuren-result-poem" class="text-sm text-gray-400 italic border-l-2 pl-3 border-gray-600">--</p>
             </div>
+            
             <div class="mt-8">
                 <button id="btn-divine-now" class="flex items-center gap-2 bg-gradient-to-r from-purple-700 to-indigo-700 hover:from-purple-600 hover:to-indigo-600 text-white font-bold py-3 px-8 rounded-full shadow-[0_0_15px_rgba(139,92,246,0.5)] transition hover:scale-105 active:scale-95">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
@@ -267,7 +279,8 @@
         </div>
     </main>
 
-    <div id="settings-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md hidden items-center justify-center z-50 transition-opacity opacity-0">
+    <!-- 時空設定面板 (預設隱藏) -->
+    <div id="settings-modal" class="fixed inset-0 bg-black/80 backdrop-blur-md hidden opacity-0 items-center justify-center z-50 transition-opacity" style="display: none;">
         <div class="bg-gray-900/90 border border-cyan-500/30 p-6 md:p-8 rounded-2xl w-full max-w-sm shadow-[0_0_30px_rgba(6,182,212,0.3)] transform transition-transform scale-95" id="settings-content">
             <h2 class="text-xl font-bold mb-4 border-b border-cyan-500/30 pb-3 text-cyan-300 tracking-wider flex justify-between items-center">
                 時空設定
@@ -277,8 +290,9 @@
             <div class="space-y-4">
                 <div>
                     <label class="block text-cyan-200 text-sm font-bold mb-1 tracking-wider">自訂日期時間</label>
-                    <input type="datetime-local" id="custom-datetime" class="w-full bg-gray-800/80 border border-gray-600 rounded-lg px-3 py-2 text-gray-200 focus:outline-none focus:border-purple-400 focus:ring-1 focus:ring-purple-400 transition">
+                    <input type="datetime-local" id="custom-datetime" class="w-full bg-gray-800/80 border border-gray-600 rounded-lg px-3 py-2 text-gray-200 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400 transition">
                 </div>
+                
                 <div class="pt-2 flex gap-3">
                     <button id="reset-now-btn" class="flex-1 bg-gray-700 hover:bg-gray-600 text-white font-bold py-2.5 px-3 rounded-lg transition border border-gray-500 text-sm">
                         回到現在
@@ -366,6 +380,12 @@
             return Math.ceil((year - 1863) / 20) % 9 || 9;
         }
 
+        /* 
+        小六壬陣列設定：
+        gridIndex 對應 3x2 網格的位置，還原古法掐指一算手勢 (馬蹄形 U 字)：
+        0: 左上 (食指上), 1: 中上 (中指上), 2: 右上 (無名指上)
+        3: 左下 (食指下 - 大安起點), 4: 中下 (中指下), 5: 右下 (無名指下)
+        */
         const liurenData = {
             1: { name: '大安', type: '大吉', color: '#4ade80', tailwind: 'text-green-400', desc: '大安事事昌，求財在坤方。\n失物去不遠，宅舍保安康。', poem: '行人身未動，病者主無妨。將軍回田野，仔細更推詳。', gridIndex: 3 },
             2: { name: '留連', type: '平凶', color: '#94a3b8', tailwind: 'text-slate-400', desc: '留連事難成，求謀日未明。\n官事只宜緩，去者未回程。', poem: '失物南方見，急討方稱心。更須防口舌，人口且平平。', gridIndex: 0 },
@@ -393,6 +413,7 @@
             const zhiList = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
             const timeIndex = zhiList.indexOf(timeZhiStr) + 1;
             
+            // 小六壬運算公式：(月 + 日 + 時 - 2) % 6
             let resultNumber = (lunarMonth + lunarDay + timeIndex - 2) % 6;
             if (resultNumber === 0) resultNumber = 6;
 
@@ -445,6 +466,7 @@
                 const solar = Solar.fromDate(currentTargetDate);
                 const lunar = solar.getLunar();
                 
+                // 獲取干支，並拆分為單字 (天干、地支)
                 const yearGanZhi = lunar.getYearInGanZhiExact();
                 const monthGanZhi = lunar.getMonthInGanZhiExact();
                 const dayGanZhi = lunar.getDayInGanZhiExact();
@@ -463,13 +485,16 @@
                 const solarMonth = currentTargetDate.getMonth() + 1;
                 const solarDay = currentTargetDate.getDate();
 
+                // 九運盤
                 const period = getPeriod(solarYear);
                 document.getElementById('period-grid').innerHTML = generateGridHTML(flyStars(period, true));
                 document.getElementById('title-period').innerText = `【${period}運盤】`;
 
+                // 流年盤
                 const yearCenter = getYearStar(solarYear);
                 document.getElementById('year-grid').innerHTML = generateGridHTML(flyStars(yearCenter, true));
 
+                // 流月盤
                 const yearZhi = lunar.getYearZhiExact(); 
                 const zhiList = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
                 const yearZhiIndex = zhiList.indexOf(yearZhi);
@@ -483,10 +508,12 @@
                 while (monthCenter <= 0) monthCenter += 9;
                 document.getElementById('month-grid').innerHTML = generateGridHTML(flyStars(monthCenter, true));
 
+                // 流日盤 (模擬)
                 let pseudoDaySeed = solarYear + solarMonth * 10 + solarDay;
                 let dayCenter = (pseudoDaySeed % 9) + 1;
                 document.getElementById('day-grid').innerHTML = generateGridHTML(flyStars(dayCenter, true));
 
+                // 更新小六壬
                 renderLiuren(Math.abs(lunar.getMonth()), lunar.getDay(), lunar.getTimeZhi());
             } catch (e) {
                 console.error("排盤計算錯誤:", e);
@@ -495,6 +522,11 @@
 
         document.addEventListener('DOMContentLoaded', async () => {
             initLiurenGrid();
+            
+            // 強制隱藏設定面板，避免異常彈出
+            const modal = document.getElementById('settings-modal');
+            modal.style.display = 'none';
+            modal.classList.add('hidden', 'opacity-0');
             
             // 初始化資料庫並讀取歷史紀錄
             await DB.init();
@@ -542,15 +574,18 @@
             tabStars.addEventListener('click', () => switchTab('stars'));
             tabLiuren.addEventListener('click', () => switchTab('liuren'));
 
-            // UI 綁定
-            const modal = document.getElementById('settings-modal');
+            // UI 設定面板綁定
             const toggleModal = (show) => {
                 if (show) {
+                    modal.style.display = 'flex';
                     modal.classList.remove('hidden'); modal.classList.add('flex');
                     setTimeout(() => { modal.classList.remove('opacity-0'); document.getElementById('settings-content').classList.remove('scale-95'); }, 10);
                 } else {
                     modal.classList.add('opacity-0'); document.getElementById('settings-content').classList.add('scale-95');
-                    setTimeout(() => { modal.classList.add('hidden'); modal.classList.remove('flex'); }, 300);
+                    setTimeout(() => { 
+                        modal.classList.add('hidden'); modal.classList.remove('flex'); 
+                        modal.style.display = 'none';
+                    }, 300);
                 }
             }
             document.getElementById('open-settings-btn').addEventListener('click', () => toggleModal(true));
@@ -580,7 +615,7 @@
                 renderAllGrids();
             });
 
-            // 啟動排盤
+            // 啟動排盤 (等待 Lunar 庫載入)
             let retryCount = 0;
             function checkAndRender() {
                 if (typeof Lunar !== 'undefined') renderAllGrids();
