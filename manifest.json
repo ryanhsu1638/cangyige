@@ -1,0 +1,29 @@
+{
+  "name": "藏易閣",
+  "short_name": "藏易閣",
+  "description": "三元玄空飛星與小六壬占卜",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#05020a",
+  "theme_color": "#160a2e",
+  "icons": [
+    {
+      "src": "icons/icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/maskable.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    },
+    {
+      "src": "icons/apple-touch-icon.svg",
+      "sizes": "180x180",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
