@@ -367,7 +367,7 @@
                 sum = tempSum;
             }
             let star = 11 - sum;
-            if (year >= 2000) star -= 1;
+            // 已修正：移除錯誤的 2000 年後減一邏輯。標準流年公式「11 - 數字和 (算至個位數)」通用於所有西元年。
             while (star <= 0) star += 9;
             while (star > 9) star -= 9;
             return star;
