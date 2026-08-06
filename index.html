@@ -494,23 +494,36 @@
                 const yearCenter = getYearStar(solarYear);
                 document.getElementById('year-grid').innerHTML = generateGridHTML(flyStars(yearCenter, true));
 
-                // 流月盤
-                const yearZhi = lunar.getYearZhiExact(); 
-                const zhiList = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
-                const yearZhiIndex = zhiList.indexOf(yearZhi);
-                
-                let startStar = 8;
-                if ([0, 6, 3, 9].includes(yearZhiIndex)) startStar = 8;
-                else if ([4, 10, 1, 7].includes(yearZhiIndex)) startStar = 5;
-                else startStar = 2;
-                
-                let monthCenter = startStar - ((solarMonth - 1) % 9);
-                while (monthCenter <= 0) monthCenter += 9;
+                // 取得真實流月飛星 (嚴格基於農曆節氣與干支月)
+                let monthCenter;
+                if (typeof lunar.getMonthNineStar === 'function') {
+                    // 直接調用曆法庫的專業九星計算
+                    monthCenter = lunar.getMonthNineStar().getNumber();
+                } else {
+                    // 備用手動算法
+                    const zhiList = ['子','丑','寅','卯','辰','巳','午','未','申','酉','戌','亥'];
+                    const yearZhiIndex = zhiList.indexOf(yearGanZhi[1]);
+                    const monthZhiIndex = zhiList.indexOf(monthGanZhi[1]); 
+                    let startStar = 8;
+                    if ([0, 6, 3, 9].includes(yearZhiIndex)) startStar = 8;
+                    else if ([4, 10, 1, 7].includes(yearZhiIndex)) startStar = 5;
+                    else startStar = 2;
+                    // 寅月(index 2)為正月，計算月份偏移
+                    let monthOffset = (monthZhiIndex - 2 + 12) % 12;
+                    monthCenter = startStar - monthOffset;
+                    while (monthCenter <= 0) monthCenter += 9;
+                }
                 document.getElementById('month-grid').innerHTML = generateGridHTML(flyStars(monthCenter, true));
 
-                // 流日盤 (模擬)
-                let pseudoDaySeed = solarYear + solarMonth * 10 + solarDay;
-                let dayCenter = (pseudoDaySeed % 9) + 1;
+                // 取得真實流日飛星 (自動判斷冬至/夏至陰陽遁)
+                let dayCenter;
+                if (typeof lunar.getDayNineStar === 'function') {
+                    // 直接調用曆法庫的專業日家紫白星計算
+                    dayCenter = lunar.getDayNineStar().getNumber();
+                } else {
+                    dayCenter = 1; // 極端環境下的兜底
+                }
+                // 玄空飛星排盤通常年月日時皆採「順飛」(洛書軌跡+1)
                 document.getElementById('day-grid').innerHTML = generateGridHTML(flyStars(dayCenter, true));
 
                 // 更新小六壬
